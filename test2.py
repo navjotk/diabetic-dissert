@@ -54,7 +54,10 @@ def get_class(name):
     
     for entry in labels:
         if entry[0]==name:
-            return entry[1]
+            if entry[1]=='0':
+                return 0
+            else:
+                return 1
     return -1
 
 def process_image(image_path):
@@ -79,7 +82,7 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
 
 
     
-num_images=500
+num_images=100
 n_fold_cv = 10
 label_file = 'trainLabels.csv'
 
@@ -115,22 +118,44 @@ test_t = zip(*test)
 test_x = np.array(test_t[0])
 test_y = list(test_t[1])
 
+
+space = {'kernel': {'linear': {'C': [0, 2]},
+                    'rbf': {'logGamma': [-5, 0], 'C': [0, 10]},
+                    'poly': {'degree': [2, 5], 'C': [0, 5], 'coef0': [0, 2]}
+                    }
+         }
 print "Training model"
 cv_decorator = optunity.cross_validated(x=train_x, y=train_y, num_folds=n_fold_cv)
 
+def train_model(x_train, y_train, kernel, C, logGamma, degree, coef0):
+    """A generic SVM training function, with arguments based on the chosen kernel."""
+    if kernel == 'linear':
+        model = SVC(kernel=kernel, C=C)
+    elif kernel == 'poly':
+        model = SVC(kernel=kernel, C=C, degree=degree, coef0=coef0)
+    elif kernel == 'rbf':
+        model = SVC(kernel=kernel, C=C, gamma=10 ** logGamma)
+    else:
+        raise ArgumentError("Unknown kernel function: %s" % kernel)
+    model.fit(x_train, y_train)
+    return model
+
 def svm_rbf_tuned_auroc(x_train, y_train, x_test, y_test, C, logGamma):
     model = SVC(C=C, gamma=10 ** logGamma).fit(x_train, y_train)
-    decision_values = model.predict(x_test)
+    decision_values = model.decision_function(x_test)
     auc = optunity.metrics.roc_auc(y_test, decision_values)
     return auc
 
+def svm_tuned_auroc(x_train, y_train, x_test, y_test, kernel='linear', C=0, logGamma=0, degree=0, coef0=0):
+    model = train_model(x_train, y_train, kernel, C, logGamma, degree, coef0)
+    decision_values = model.decision_function(x_test)
+    return optunity.metrics.roc_auc(y_test, decision_values)
+
+#svm_tuned_auroc = cv_decorator(svm_tuned_auroc)
 svm_rbf_tuned_auroc = cv_decorator(svm_rbf_tuned_auroc)
 print svm_rbf_tuned_auroc(C=1.0, logGamma=0.0)
 
+optimal_svm_pars, info, _ = optunity.maximize_structured(svm_tuned_auroc, space, num_evals=150)
+print("Optimal parameters" + str(optimal_svm_pars))
+print("AUROC of tuned SVM: %1.3f" % info.optimum)
 
-optimal_rbf_pars, info, _ = optunity.maximize(svm_rbf_tuned_auroc, num_evals=150, C=[0, 10], logGamma=[-5, 0])
-# when running this outside of IPython we can parallelize via optunity.pmap
-# optimal_rbf_pars, _, _ = optunity.maximize(svm_rbf_tuned_auroc, 150, C=[0, 10], gamma=[0, 0.1], pmap=optunity.pmap)
-
-print("Optimal parameters: " + str(optimal_rbf_pars))
-print("AUROC of tuned SVM with RBF kernel: %1.3f" % info.optimum)
