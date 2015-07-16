@@ -82,7 +82,7 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
 
 
     
-num_images=100
+num_images=5000
 n_fold_cv = 10
 label_file = 'trainLabels.csv'
 
@@ -151,9 +151,9 @@ def svm_tuned_auroc(x_train, y_train, x_test, y_test, kernel='linear', C=0, logG
     decision_values = model.decision_function(x_test)
     return optunity.metrics.roc_auc(y_test, decision_values)
 
-#svm_tuned_auroc = cv_decorator(svm_tuned_auroc)
-svm_rbf_tuned_auroc = cv_decorator(svm_rbf_tuned_auroc)
-print svm_rbf_tuned_auroc(C=1.0, logGamma=0.0)
+svm_tuned_auroc = cv_decorator(svm_tuned_auroc)
+#svm_rbf_tuned_auroc = cv_decorator(svm_rbf_tuned_auroc)
+#print svm_rbf_tuned_auroc(C=1.0, logGamma=0.0)
 
 optimal_svm_pars, info, _ = optunity.maximize_structured(svm_tuned_auroc, space, num_evals=150)
 print("Optimal parameters" + str(optimal_svm_pars))
