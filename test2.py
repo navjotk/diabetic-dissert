@@ -79,7 +79,7 @@ def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
 
 
     
-num_images=5000
+num_images=500
 n_fold_cv = 10
 label_file = 'trainLabels.csv'
 
@@ -108,33 +108,29 @@ test = Parallel(n_jobs=6)(delayed(process_image)(i) for i in test_paths)
 
 
 train_t = zip(*train)
-train_x = list(train_t[0])
+train_x = np.array(train_t[0])
 train_y = list(train_t[1])
 
-print len(train_x)
-print len(train_y)
 test_t = zip(*test)
-test_x = list(test_t[0])
+test_x = np.array(test_t[0])
 test_y = list(test_t[1])
 
 print "Training model"
-tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
-                     'C': [1, 10, 100, 1000]},
-                    {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
+cv_decorator = optunity.cross_validated(x=train_x, y=train_y, num_folds=n_fold_cv)
 
-clf = GridSearchCV(SVC(C=1), tuned_parameters, cv=5)
-clf.fit(train_x, train_y)
-
-print "Training complete. Now testing"
-
-y_pred = clf.predict(test_x)
-
-
-@optunity.cross_validated(x=data, y=labels, num_folds=5)
-def svm_default_auroc(x_train, y_train, x_test, y_test):
-    model = sklearn.svm.SVC().fit(x_train, y_train)
-    decision_values = model.decision_function(x_test)
+def svm_rbf_tuned_auroc(x_train, y_train, x_test, y_test, C, logGamma):
+    model = SVC(C=C, gamma=10 ** logGamma).fit(x_train, y_train)
+    decision_values = model.predict(x_test)
     auc = optunity.metrics.roc_auc(y_test, decision_values)
     return auc
 
-svm_default_auroc()
+svm_rbf_tuned_auroc = cv_decorator(svm_rbf_tuned_auroc)
+print svm_rbf_tuned_auroc(C=1.0, logGamma=0.0)
+
+
+optimal_rbf_pars, info, _ = optunity.maximize(svm_rbf_tuned_auroc, num_evals=150, C=[0, 10], logGamma=[-5, 0])
+# when running this outside of IPython we can parallelize via optunity.pmap
+# optimal_rbf_pars, _, _ = optunity.maximize(svm_rbf_tuned_auroc, 150, C=[0, 10], gamma=[0, 0.1], pmap=optunity.pmap)
+
+print("Optimal parameters: " + str(optimal_rbf_pars))
+print("AUROC of tuned SVM with RBF kernel: %1.3f" % info.optimum)
