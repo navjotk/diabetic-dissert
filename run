@@ -1,0 +1,13 @@
+counter=0
+counter=$(( $counter + 1 ))
+filename="$counter.txt"
+while [ -f $filename ] ;
+do
+      counter=$(( $counter + 1 ))
+	filename="$counter.txt"
+done
+touch $filename
+
+python $1 >$filename
+python mail.py $filename
+rm $filename
