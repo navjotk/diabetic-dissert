@@ -11,31 +11,10 @@ from skimage.feature import blob_dog, blob_log, blob_doh
 from math import sqrt
 from skimage.color import rgb2gray
 
-contents = os.listdir("images")
-
-print "Found "+str(len(contents))+" images"
-
-image = misc.imread('images/'+contents[6])
-image_gray = rgb2gray(image)
 
 
-
-fd, hog_image = hog(image_gray, orientations=8, pixels_per_cell=(16, 16),
-                    cells_per_block=(1, 1), visualise=True)
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
-
-ax1.axis('off')
-ax1.imshow(image, cmap=plt.cm.gray)
-ax1.set_title('Input image')
-
-# Rescale histogram for better display
-hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.02))
-
-ax2.axis('off')
-ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)
-ax2.set_title('Histogram of Oriented Gradients')
-plt.show()
+image = misc.imread('16_right.jpeg')
+image_gray = image[:,:,1]
 
 
 

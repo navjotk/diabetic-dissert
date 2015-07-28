@@ -10,6 +10,7 @@ import optunity
 import optunity.metrics
 from sklearn.metrics import roc_auc_score
 from sklearn.svm import SVC
+import log
 
 class model:
     def __init__(self, images, labels, n_folds_cv):
@@ -18,16 +19,17 @@ class model:
                     'poly': {'degree': [2, 5], 'C': [0, 5], 'coef0': [0, 2]}
                     }
          }
-        
+        self.__log = log.Logger()
         self.__cv_decorator_ = optunity.cross_validated(x=images, y=labels, num_folds=n_folds_cv)
         
     
     def fixed_params(self, C, logGamma):
+        self.__log.write("Training Model")
         self.__svm_rbf_tuned_auroc_ = self.__cv_decorator_(self.__svm_rbf_tuned_auroc_)
         return self.__svm_rbf_tuned_auroc_(C=C, logGamma=logGamma)
     
     def optimise(self):
-        print "Optimising model"
+        self.__log.write("Optimising model")
         self.__svm_tuned_auroc_ = self.__cv_decorator_(self.__svm_tuned_auroc_)
         optimal_svm_pars, info, _ = optunity.maximize_structured(self.__svm_tuned_auroc_, self.__space_, num_evals=150)
         print("Optimal parameters" + str(optimal_svm_pars))
@@ -37,18 +39,18 @@ class model:
     def __train_model_(self, x_train, y_train, kernel, C, logGamma, degree, coef0):
         """A generic SVM training function, with arguments based on the chosen kernel."""
         if kernel == 'linear':
-            model = SVC(kernel=kernel, C=C)
+            model = SVC(kernel=kernel, C=C, cache_size=7000)
         elif kernel == 'poly':
-            model = SVC(kernel=kernel, C=C, degree=degree, coef0=coef0)
+            model = SVC(kernel=kernel, C=C, degree=degree, coef0=coef0, cache_size=7000)
         elif kernel == 'rbf':
-            model = SVC(kernel=kernel, C=C, gamma=10 ** logGamma)
+            model = SVC(kernel=kernel, C=C, gamma=10 ** logGamma, cache_size=7000)
         else:
             raise ArgumentError("Unknown kernel function: %s" % kernel)
         model.fit(x_train, y_train)
         return model
     
     def __svm_rbf_tuned_auroc_(self, x_train, y_train, x_test, y_test, C, logGamma):
-        model = SVC(C=C, gamma=10 ** logGamma).fit(x_train, y_train)
+        model = SVC(C=C, gamma=10 ** logGamma, cache_size=7000).fit(x_train, y_train)
         decision_values = model.decision_function(x_test)
         auc = optunity.metrics.roc_auc(y_test, decision_values)
         return auc
