@@ -26,7 +26,7 @@ class preprocess:
     def process_images(self):
         self.print_replace("Starting processing")
         self.__progress_ = ProgressBar(self.__term_, 'Processing images')
-        images = Parallel(n_jobs=12)(delayed(process_image)(self, i) for i in self.__image_paths_) 
+        images = Parallel(n_jobs=12)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
         return images
        
     def rgb2singch(self, image):
@@ -92,10 +92,10 @@ def process_image2(obj, image_path):
     image_o = image
     image = skimage.filters.median(image, skimage.morphology.rectangle(1, 1))
     image = skimage.filters.gaussian_filter(image, 1)
-    image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
-    image = skimage.morphology.binary_closing(image, selem=skimage.morphology.rectangle(1,1))
-    image = image_o-image
-    image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512)
+    #image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
+    #image = skimage.morphology.binary_closing(image, selem=skimage.morphology.rectangle(1,1))
+    #image = image_o-image
+    #image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512)
     hog_fd = obj.get_hog_fd(image)
     increment(obj, image_path)
     return hog_fd   

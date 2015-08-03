@@ -33,6 +33,15 @@ class dataloader:
                 lines.append(row)
         return lines
     
+    def load_features(self, file):
+        return self.__load_file_(file)
+    
+    def write_csv(self, file, rows):
+        with open(file, 'wb') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in rows:
+                writer.writerow(row)
+    
     def __load_image_file_names_(self):
         contents = os.listdir(self.__image_directory_)
         if self.__num_to_load_==0:
@@ -50,11 +59,11 @@ class dataloader:
         name=name_ar[0]
         for entry in self.__lines_:
             if entry[0]==name:
-                return entry[1]
-                #if entry[1]=='0' or entry[1]=='1':
-                #    return 0    #0 for original class 0
-                #else:
-                #    return 1    #For any of the original classes 1,2,3,4, return 1
+                #return entry[1] #Multi-class
+                if entry[1]=='0' or entry[1]=='1':
+                    return 0    #0 for original class 0
+                else:
+                    return 1    #For any of the original classes 1,2,3,4, return 1
         print "No label found for name "+name
         return -1               #Name not found
     
