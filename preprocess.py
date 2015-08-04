@@ -32,7 +32,7 @@ class preprocess:
             p_jobs=15
         else:
             p_jobs=10
-        images = Parallel(n_jobs=p_jobs)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
+        images = Parallel(n_jobs=-1)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
         return images
        
     def rgb2singch(self, image):
@@ -40,18 +40,6 @@ class preprocess:
         return image[:,:,1]            #Green channel
         #return image[:,:,0]         #Red Channel
         #return image[:,:,2]        #Blue Channel
-    
-    def get_hog_fd(self, image):
-        fd = hog(image, orientations=8, pixels_per_cell=(64, 64),
-                        cells_per_block=(1, 1), normalise=True)
-        return fd
-    
-    def meta(self, image):
-        return surf.meta_descriptor(image)
-    
-    def hough(self, image):
-        print "H"
-        return skimage.transform.hough_ellipse(image)
     
     def median_filter(self, image):
         return skimage.filters.median(image, skimage.morphology.rectangle(3, 3))

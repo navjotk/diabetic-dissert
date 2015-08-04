@@ -12,6 +12,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.svm import SVC
 import log
 import sklearn
+import crossvalidation
 
 class model:
     def __init__(self, images, labels, n_folds_cv):
@@ -72,6 +73,19 @@ class model:
     def __sgd_tuned_auroc_(self, x_train, y_train, x_test, y_test, alpha=0.0001, power_t=0.5):
         model = sklearn.linear_model.SGDClassifier(loss="hinge", penalty="l2", alpha=alpha, fit_intercept=True, n_jobs=-1, power_t=power_t).fit(x_train, y_train)
         decision_values = model.decision_function(x_test)
-        roc_auc_score(y_test, decision_values)
-        return auc
+        return roc_auc_score(y_test, decision_values)
+
+
+class model_w_cv:
+    def __init__(self, images, labels, n_folds_cv):
+        data = zip(images, labels)
+        train_paths, test_paths = crossvalidation.cv(data, n_folds_cv).get()
+        self.test = test_paths
+        self.train = train_paths
     
+    def process(self, C, logGamma):
+        train_x, train_y = zip(*self.train)
+        test_x, test_y = zip(*self.test)
+        model = SVC(C=C, gamma=10 ** logGamma, cache_size=7000).fit(train_x, train_y)
+        y_pred = model.predict(test_x)
+        print sklearn.metrics.confusion_matrix(test_y, y_pred)

@@ -4,9 +4,8 @@ Created on 14 Jul 2015
 @author: navjotkukreja
 '''
 from dataloader import dataloader
-import crossvalidation
 from preprocess import preprocess
-from model import model
+import model
 import sys
 import log
 import numpy as np
@@ -14,8 +13,8 @@ import feature
 import detector
 
 reprocess = True    
-num_images=100
-n_fold_cv = 20
+num_images=1000
+n_fold_cv = 5
 label_file = 'trainLabels.csv'
 image_directory = 'images'
 
@@ -37,14 +36,16 @@ if __name__=='__main__':
         processed = process.process_images()
         feature_extractor = feature.feature()
         features = feature_extractor.extract_features(processed)
-        print type(features[0])
         #loader.write_csv('vecs.csv', map(list, zip(labels, features)))
     else:
         rows = loader.load_features('vecs.csv')
         print np.array(rows).shape
         labels, features = zip(*rows)
         print features
-    #train_paths, test_paths = cv(data, n_fold_cv)
-    model = model(features, labels, n_fold_cv)
-    print model.fixed_params(0.4, 1.5)
+    
+    
+    model = model.model_w_cv(features, labels, n_fold_cv)
+    model.process(0.4, 1.5)
+    #model = model(features, labels, n_fold_cv)
+    #print model.fixed_params(0.4, 1.5)
     #model.optimise_sgd()
