@@ -10,11 +10,11 @@ from joblib import Parallel, delayed
 import numpy as np
 from skimage.feature import hog
 import surf
+import detector
 
 class feature:
     def __init__(self):
-        global GLOBAL_WINDOWS
-        if not GLOBAL_WINDOWS:
+        if not detector.GLOBAL_WINDOWS:
             self.__term_ = TerminalController()
     
     def extract_features(self, images, algorithm='hog'):
@@ -37,8 +37,7 @@ class feature:
         return fd
     
     def update_progress(self, c):
-        global GLOBAL_WINDOWS
-        if GLOBAL_WINDOWS:
+        if detector.GLOBAL_WINDOWS:
             print "Working on "+str(c.value)+"/"+str(self.__total_)
         else:
             self.__progress_.update(float(c.value)/self.__total_, 'working on %i' % c.value)

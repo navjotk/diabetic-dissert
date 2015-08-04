@@ -11,7 +11,7 @@ import sys
 import log
 import numpy as np
 import feature
-import platform
+import detector
 
 reprocess = True    
 num_images=500
@@ -19,13 +19,10 @@ n_fold_cv = 20
 label_file = 'trainLabels.csv'
 image_directory = 'images_large'
 
-if platform.system()=='Windows':
-    GLOBAL_WINDOWS = True
-else:
-    GLOBAL_WINDOWS = False
+
 
 #Make sure we are running inside a virtualenv
-if not hasattr(sys, 'real_prefix') and GLOBAL_WINDOWS==False:
+if not hasattr(sys, 'real_prefix') and detector.GLOBAL_WINDOWS==False:
     print "No virtualenv set. Please activate a virtualenv before running."
     sys.exit()
 if __name__=='__main__':

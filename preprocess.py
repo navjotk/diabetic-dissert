@@ -16,11 +16,11 @@ from multiprocessing import Value, Lock, Process
 import surf
 from skimage.io import imread
 import numpy as np
+import detector
 
 class preprocess:
     def __init__(self, image_paths):
-        global GLOBAL_WINDOWS
-        if not GLOBAL_WINDOWS:
+        if not detector.GLOBAL_WINDOWS:
             self.__term_ = TerminalController()
         self.imgIndex = 0
         self.__image_paths_ = image_paths
@@ -63,8 +63,7 @@ class preprocess:
             sys.stdout.write(self.__term_.BOL + self.__term_.CLEAR_EOL)
         
     def update_progress(self, filename, c):
-        global GLOBAL_WINDOWS
-        if GLOBAL_WINDOWS:
+        if detector.GLOBAL_WINDOWS:
             print "Working on filename "+str(c)+"/"+str(len(self.__image_paths_))
         else:
             self.__progress_.update(float(c.value)/len(self.__image_paths_), 'working on %s' % filename)  
