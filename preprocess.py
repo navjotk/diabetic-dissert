@@ -27,7 +27,8 @@ class preprocess:
         
     def process_images(self):
         self.print_replace("Starting processing")
-        self.__progress_ = ProgressBar(self.__term_, 'Processing images')
+        if not detector.GLOBAL_WINDOWS:
+            self.__progress_ = ProgressBar(self.__term_, 'Processing images')
         images = Parallel(n_jobs=20)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
         return images
        
@@ -103,13 +104,13 @@ def process_image2(obj, image_path):
     image = image_o-image
     image = skimage.filters.median(image, skimage.morphology.rectangle(10, 10))
     kernel_size = 120
-    image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512, ntiles_x=kernel_size, ntiles_y=kernel_size)
+    image = skimage.exposure.equalize_adapthist(image,clip_limit=0.04, nbins=512, ntiles_x=kernel_size, ntiles_y=kernel_size)
     image=(image*255).astype(np.uint8)
     image_o = image
     
-    image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
+    #image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
     
-    image = image_o-image
+    #image = image_o-image
     #hog_fd = obj.get_hog_fd(image)
     increment(obj, image_path)
     return image   
