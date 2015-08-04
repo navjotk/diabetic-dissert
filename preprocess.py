@@ -18,15 +18,17 @@ from skimage.io import imread
 import numpy as np
 
 class preprocess:
-    def __init__(self, image_paths, ):
-        self.__term_ = TerminalController()
+    def __init__(self, image_paths):
+        global GLOBAL_WINDOWS
+        if not GLOBAL_WINDOWS:
+            self.__term_ = TerminalController()
         self.imgIndex = 0
         self.__image_paths_ = image_paths
         
     def process_images(self):
         self.print_replace("Starting processing")
         self.__progress_ = ProgressBar(self.__term_, 'Processing images')
-        images = Parallel(n_jobs=12)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
+        images = Parallel(n_jobs=20)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
         return images
        
     def rgb2singch(self, image):
@@ -36,7 +38,7 @@ class preprocess:
         #return image[:,:,2]        #Blue Channel
     
     def get_hog_fd(self, image):
-        fd = hog(image, orientations=9, pixels_per_cell=(8, 8),
+        fd = hog(image, orientations=8, pixels_per_cell=(64, 64),
                         cells_per_block=(1, 1), normalise=True)
         return fd
     
@@ -56,10 +58,16 @@ class preprocess:
     def print_replace(self, text):
         sys.stdout.write(text)
         sys.stdout.flush()
-        sys.stdout.write(self.__term_.BOL + self.__term_.CLEAR_EOL)
+        global GLOBAL_WINDOWS
+        if not GLOBAL_WINDOWS:
+            sys.stdout.write(self.__term_.BOL + self.__term_.CLEAR_EOL)
         
     def update_progress(self, filename, c):
-        self.__progress_.update(float(c.value)/len(self.__image_paths_), 'working on %s' % filename)  
+        global GLOBAL_WINDOWS
+        if GLOBAL_WINDOWS:
+            print "Working on filename "+str(c)+"/"+str(len(self.__image_paths_))
+        else:
+            self.__progress_.update(float(c.value)/len(self.__image_paths_), 'working on %s' % filename)  
 #Class ends
 
 
@@ -90,12 +98,20 @@ def process_image2(obj, image_path):
     image = imread(image_path)
     image = obj.rgb2singch(image)
     image_o = image
-    image = skimage.filters.median(image, skimage.morphology.rectangle(1, 1))
+    image = skimage.filters.median(image, skimage.morphology.rectangle(50, 50))
     image = skimage.filters.gaussian_filter(image, 1)
-    #image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
-    #image = skimage.morphology.binary_closing(image, selem=skimage.morphology.rectangle(1,1))
-    #image = image_o-image
-    #image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512)
-    hog_fd = obj.get_hog_fd(image)
+    image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
+    image = skimage.morphology.binary_closing(image)
+    image = image_o-image
+    image = skimage.filters.median(image, skimage.morphology.rectangle(10, 10))
+    kernel_size = 120
+    image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512, ntiles_x=kernel_size, ntiles_y=kernel_size)
+    image=(image*255).astype(np.uint8)
+    image_o = image
+    
+    image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
+    
+    image = image_o-image
+    #hog_fd = obj.get_hog_fd(image)
     increment(obj, image_path)
-    return hog_fd   
+    return image   

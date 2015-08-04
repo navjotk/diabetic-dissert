@@ -15,10 +15,10 @@ import cv2
 
 
 
-num_images=1
+num_images=10
 n_fold_cv = 20
 label_file = 'trainLabels.csv'
-image_directory = 'images'
+image_directory = 'images_large'
 
 
 #export DYLD_FALLBACK_LIBRARY_PATH=/usr/local/cuda/lib:$HOME/anaconda/lib:/usr/local/lib:/usr/lib:/opt/intel/composer_xe_2015.2.132/compiler/lib:/opt/intel/composer_xe_2015.2.132/mkl/lib
@@ -35,15 +35,15 @@ data = loader.get_data()
 image_paths, labels=zip(*data)
 f = pylab.figure()
 
-#image = imread(image_paths[6])
+image = imread(image_paths[2])
 print "Reading image "+image_paths[0]
-image = imread("images/16_left.jpeg")
+#image = imread("images_large/16_left.jpeg")
 arr=np.asarray(image)
 f.add_subplot(2, 1, 1)
 pylab.imshow(arr)
 image = image[:,:,1]
 image_o = image
-image = skimage.filters.median(image, skimage.morphology.rectangle(1, 1))
+image = skimage.filters.median(image, skimage.morphology.rectangle(50, 50))
 print "Applying gaussian filter"
 image = skimage.filters.gaussian_filter(image, 1)
 print "Applying opening"
@@ -51,11 +51,13 @@ image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectan
 print "Applying closing"
 image = skimage.morphology.binary_closing(image)
 image = image_o-image
-
-image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512)
+image = skimage.filters.median(image, skimage.morphology.rectangle(10, 10))
+kernel_size = 120
+image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512, ntiles_x=kernel_size, ntiles_y=kernel_size)
 image=(image*255).astype(np.uint8)
 image_o = image
-image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,101,30)
+
+image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
 
 image = image_o-image
 arr=np.asarray(image)

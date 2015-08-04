@@ -6,6 +6,9 @@ Created on 22 Jul 2015
 
 
 import cv2
+import numpy as np
+from scipy.cluster.vq import vq, kmeans, whiten
+import scipy
 
 def partial_vector(image, threshold):
     surf = cv2.SURF(threshold)
@@ -57,6 +60,35 @@ def meta_descriptor(image):
         partial_vec = partial_vector(image, threshold)
         complete_vector = complete_vector+partial_vec
     return complete_vector
+
+class surf:
+    def extract_features(self, images):
+        descriptors = np.array([])
+        surf = cv2.SURF(500)
+        print "Extracting features"
+        image_des=[]
+        for image in images:
+            image=(image*255).astype(np.uint8)
+            kp, des = surf.detectAndCompute(image, None)
+            image_des.append(des)
+            descriptors = np.append(descriptors, des)
+        desc = np.reshape(descriptors, (len(descriptors)/128, 128))
+        #desc = np.float32(desc)
+        print "Clustering"
+        codebook, dist = scipy.cluster.vq.kmeans(desc, k_or_guess=100, iter=20, thresh=1e-05)
+        print codebook.shape
+        print "Vector quantisation"
+        vectors = []
+        for i in image_des:
+            vector,dist = scipy.cluster.vq.vq(i, codebook)
+            print vector.shape
+            vectors.append(vector)
+        return vectors
+    
+
+
+
+
 #img = cv2.imread("16_right.jpeg")
 
 
