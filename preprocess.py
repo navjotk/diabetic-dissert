@@ -29,7 +29,7 @@ class preprocess:
         self.print_replace("Starting processing")
         if not detector.GLOBAL_WINDOWS:
             self.__progress_ = ProgressBar(self.__term_, 'Processing images')
-            p_jobs=20
+            p_jobs=15
         else:
             p_jobs=10
         images = Parallel(n_jobs=p_jobs)(delayed(process_image2)(self, i) for i in self.__image_paths_) 

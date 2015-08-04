@@ -22,7 +22,7 @@ class feature:
         if not detector.GLOBAL_WINDOWS:
             self.__progress_ = ProgressBar(self.__term_, 'Extracting features')
             self.update_progress(c_int(0))
-            p_jobs=20
+            p_jobs=15
         else:
             p_jobs=10
         

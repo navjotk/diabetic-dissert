@@ -61,7 +61,7 @@ class model:
     def __svm_rbf_tuned_auroc_(self, x_train, y_train, x_test, y_test, C, logGamma):
         model = SVC(C=C, gamma=10 ** logGamma, cache_size=7000).fit(x_train, y_train)
         decision_values = model.decision_function(x_test)
-        auc = optunity.metrics.roc_auc(y_test, decision_values)
+        auc = roc_auc_score(y_test, decision_values)
         return auc
     
     def __svm_tuned_auroc_(self, x_train, y_train, x_test, y_test, kernel='linear', C=0, logGamma=0, degree=0, coef0=0):
@@ -72,6 +72,6 @@ class model:
     def __sgd_tuned_auroc_(self, x_train, y_train, x_test, y_test, alpha=0.0001, power_t=0.5):
         model = sklearn.linear_model.SGDClassifier(loss="hinge", penalty="l2", alpha=alpha, fit_intercept=True, n_jobs=-1, power_t=power_t).fit(x_train, y_train)
         decision_values = model.decision_function(x_test)
-        auc = optunity.metrics.roc_auc(y_test, decision_values)
+        roc_auc_score(y_test, decision_values)
         return auc
     
