@@ -64,7 +64,7 @@ class preprocess:
         
     def update_progress(self, filename, c):
         if detector.GLOBAL_WINDOWS:
-            print "Working on filename "+str(c)+"/"+str(len(self.__image_paths_))
+            print "Working on "+filename+str(c.value)+"/"+str(len(self.__image_paths_))
         else:
             self.__progress_.update(float(c.value)/len(self.__image_paths_), 'working on %s' % filename)  
 #Class ends
