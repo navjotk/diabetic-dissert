@@ -29,7 +29,10 @@ class preprocess:
         self.print_replace("Starting processing")
         if not detector.GLOBAL_WINDOWS:
             self.__progress_ = ProgressBar(self.__term_, 'Processing images')
-        images = Parallel(n_jobs=20)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
+            p_jobs=20
+        else:
+            p_jobs=10
+        images = Parallel(n_jobs=p_jobs)(delayed(process_image2)(self, i) for i in self.__image_paths_) 
         return images
        
     def rgb2singch(self, image):

@@ -17,7 +17,7 @@ reprocess = True
 num_images=100
 n_fold_cv = 20
 label_file = 'trainLabels.csv'
-image_directory = 'images_large'
+image_directory = 'images'
 
 
 
@@ -37,7 +37,7 @@ if __name__=='__main__':
         processed = process.process_images()
         feature_extractor = feature.feature()
         features = feature_extractor.extract_features(processed)
-        
+        print type(features[0])
         #loader.write_csv('vecs.csv', map(list, zip(labels, features)))
     else:
         rows = loader.load_features('vecs.csv')

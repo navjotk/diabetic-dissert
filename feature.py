@@ -19,11 +19,15 @@ class feature:
     
     def extract_features(self, images, algorithm='hog'):
         self.__total_ = len(images)
-        self.__progress_ = ProgressBar(self.__term_, 'Extracting features')
-        self.update_progress(c_int(0))
+        if not detector.GLOBAL_WINDOWS:
+            self.__progress_ = ProgressBar(self.__term_, 'Extracting features')
+            self.update_progress(c_int(0))
+            p_jobs=20
+        else:
+            p_jobs=10
         
         if algorithm=='hog':
-            images = Parallel(n_jobs=20)(delayed(process_image_hog)(self, i) for i in images)
+            images = Parallel(n_jobs=p_jobs)(delayed(process_image_hog)(self, i) for i in images)
         else:
             if algorithm=='surf':
                 self.__surf_extractor_=surf.surf()
