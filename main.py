@@ -14,7 +14,7 @@ import feature
 import detector
 
 reprocess = True    
-num_images=500
+num_images=100
 n_fold_cv = 20
 label_file = 'trainLabels.csv'
 image_directory = 'images_large'

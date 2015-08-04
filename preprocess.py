@@ -58,8 +58,7 @@ class preprocess:
     def print_replace(self, text):
         sys.stdout.write(text)
         sys.stdout.flush()
-        global GLOBAL_WINDOWS
-        if not GLOBAL_WINDOWS:
+        if not detector.GLOBAL_WINDOWS:
             sys.stdout.write(self.__term_.BOL + self.__term_.CLEAR_EOL)
         
     def update_progress(self, filename, c):
