@@ -88,16 +88,16 @@ def process_image2(obj, image_path):
     image = imread(image_path)
     image = obj.rgb2singch(image)
     image_o = image
-    #image = skimage.filters.median(image, skimage.morphology.rectangle(50, 50))
-    #image = skimage.filters.gaussian_filter(image, 1)
-    #image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
-    #image = skimage.morphology.binary_closing(image)
-    #image = image_o-image
-    #image = skimage.filters.median(image, skimage.morphology.rectangle(10, 10))
+    image = skimage.filters.median(image, skimage.morphology.rectangle(50, 50))
+    image = skimage.filters.gaussian_filter(image, 1)
+    image = skimage.morphology.binary_opening(image, selem=skimage.morphology.rectangle(1,1))
+    image = skimage.morphology.binary_closing(image)
+    image = image_o-image
+    image = skimage.filters.median(image, skimage.morphology.rectangle(10, 10))
     kernel_size = 120
     image = skimage.exposure.equalize_adapthist(image,clip_limit=0.04, nbins=512, ntiles_x=kernel_size, ntiles_y=kernel_size)
     image=(image*255).astype(np.uint8)
-    #image_o = image
+    image_o = image
     
     #image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
     

@@ -17,7 +17,7 @@ class feature:
         if not detector.GLOBAL_WINDOWS:
             self.__term_ = TerminalController()
     
-    def extract_features(self, images, algorithm='surf'):
+    def extract_features(self, images, algorithm='hog'):
         self.__total_ = len(images)
         if not detector.GLOBAL_WINDOWS:
             self.__progress_ = ProgressBar(self.__term_, 'Extracting features')
