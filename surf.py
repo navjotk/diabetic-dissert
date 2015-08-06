@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from scipy.cluster.vq import vq, kmeans, whiten
 import scipy
+import sklearn.cluster
 
 def partial_vector(image, threshold):
     surf = cv2.SURF(threshold)
@@ -62,10 +63,11 @@ def meta_descriptor(image):
     return complete_vector
 
 class surf:
-    def extract_features(self, images):
+    def extract_features(self, images, n_clusters):
         descriptors = np.array([])
         surf = cv2.SURF(500)
         print "Extracting features"
+        self.__n_clusters_=n_clusters
         image_des=[]
         for image in images:
             image=(image*255).astype(np.uint8)
@@ -73,20 +75,33 @@ class surf:
             image_des.append(des)
             descriptors = np.append(descriptors, des)
         desc = np.reshape(descriptors, (len(descriptors)/128, 128))
+        print "Total of "+str(len(desc))+" features"
         #desc = np.float32(desc)
         print "Clustering"
-        codebook, dist = scipy.cluster.vq.kmeans(desc, k_or_guess=100, iter=20, thresh=1e-05)
-        print codebook.shape
+        self.__kmeans_model_ = sklearn.cluster.KMeans(n_clusters=self.__n_clusters_, n_jobs=-1)
+        self.__kmeans_model_.fit(desc)
+        #codebook, dist = scipy.cluster.vq.kmeans(desc, k_or_guess=100, iter=20, thresh=1e-05)
+       
         print "Vector quantisation"
         vectors = []
         for i in image_des:
-            vector,dist = scipy.cluster.vq.vq(i, codebook)
+            vector = self.vectorize(i)
             print vector.shape
             vectors.append(vector)
         return vectors
     
-
-
+    def vectorize(self, des):
+        vector = {}
+        for feature in des:
+            y = self.__kmeans_model_.predict(feature)
+            vector[y] = vector.get(y, 0)+1
+        
+        
+        vector_list = []
+        for i in range(0,self.__n_clusters_):
+            vector_list.append(vector.get(i,0))
+        
+        return vector_list
 
 
 #img = cv2.imread("16_right.jpeg")

@@ -13,7 +13,7 @@ import feature
 import detector
 
 reprocess = True    
-num_images=1000
+num_images=100
 n_fold_cv = 5
 label_file = 'trainLabels.csv'
 image_directory = 'images'
@@ -45,7 +45,7 @@ if __name__=='__main__':
     
     
     model = model.model_w_cv(features, labels, n_fold_cv)
-    model.process(0.4, 1.5)
+    model.process(10, 1.5)
     #model = model(features, labels, n_fold_cv)
     #print model.fixed_params(0.4, 1.5)
     #model.optimise_sgd()

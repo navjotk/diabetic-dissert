@@ -18,9 +18,9 @@ import cv2
 num_images=10
 n_fold_cv = 20
 label_file = 'trainLabels.csv'
-image_directory = 'images_large'
+image_directory = 'images_2'
 
-
+surf = cv2.SURF(2000)
 #export DYLD_FALLBACK_LIBRARY_PATH=/usr/local/cuda/lib:$HOME/anaconda/lib:/usr/local/lib:/usr/lib:/opt/intel/composer_xe_2015.2.132/compiler/lib:/opt/intel/composer_xe_2015.2.132/mkl/lib
 
 
@@ -57,9 +57,12 @@ image = skimage.exposure.equalize_adapthist(image,clip_limit=0.05, nbins=512, nt
 image=(image*255).astype(np.uint8)
 image_o = image
 
-image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
+#image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,501,30)
 
-image = image_o-image
+#image = image_o-image
+kp = surf.detect(image,None)
+image = cv2.drawKeypoints(image, kp)
+cv2.imwrite('output.jpg', image)
 arr=np.asarray(image)
 f.add_subplot(2, 1, 2)
 pylab.imshow(arr)

@@ -17,7 +17,7 @@ class feature:
         if not detector.GLOBAL_WINDOWS:
             self.__term_ = TerminalController()
     
-    def extract_features(self, images, algorithm='hog'):
+    def extract_features(self, images, algorithm='surf'):
         self.__total_ = len(images)
         if not detector.GLOBAL_WINDOWS:
             self.__progress_ = ProgressBar(self.__term_, 'Extracting features')
@@ -31,12 +31,12 @@ class feature:
         else:
             if algorithm=='surf':
                 self.__surf_extractor_=surf.surf()
-                images = self.__surf_extractor_.extract_features(images)
+                images = self.__surf_extractor_.extract_features(images, 100)
         
         return images
     
     def get_hog_fd(self, image):
-        fd = hog(image, orientations=8, pixels_per_cell=(64, 64),
+        fd = hog(image, orientations=8, pixels_per_cell=(10, 10),
                         cells_per_block=(1, 1), normalise=True)
         return fd
     
