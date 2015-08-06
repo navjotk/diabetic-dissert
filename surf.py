@@ -78,7 +78,7 @@ class surf:
         print "Total of "+str(len(desc))+" features"
         #desc = np.float32(desc)
         print "Clustering"
-        self.__kmeans_model_ = sklearn.cluster.KMeans(n_clusters=self.__n_clusters_, n_jobs=-1)
+        self.__kmeans_model_ = sklearn.cluster.KMeans(n_clusters=self.__n_clusters_, n_jobs=-1, n_init=1, max_iter=1, precompute_distances=True, verbose=1000000, tol=1e-01)
         self.__kmeans_model_.fit(desc)
         #codebook, dist = scipy.cluster.vq.kmeans(desc, k_or_guess=100, iter=20, thresh=1e-05)
        
@@ -94,6 +94,7 @@ class surf:
         vector = {}
         for feature in des:
             y = self.__kmeans_model_.predict(feature)
+            print y
             vector[y] = vector.get(y, 0)+1
         
         
